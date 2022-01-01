@@ -28,7 +28,13 @@ class PromptDialog(QDialog):
         self.show()
 
 
+
     def get_results(self) -> tuple:
+        """
+        get the results entered by the user
+        :return: a tuple of 3 elements: locker's name, locker's password,
+                 and confirm password. Return null if the user cancels
+        """
         if self.exec_() == QDialog.Accepted:
             name = str(self.name_box.text()).strip()
             pw = str(self.password_box.text()).strip()
@@ -38,7 +44,12 @@ class PromptDialog(QDialog):
             return None
 
 
-    def setup_ui(self, dialog):
+
+    def setup_ui(self, dialog) -> None:
+        """
+        setup the UI components
+        :param dialog: the dialog window
+        """
         dialog.setObjectName("Dialog")
         dialog.resize(367, 235)
         dialog.setAutoFillBackground(False)
@@ -85,7 +96,12 @@ class PromptDialog(QDialog):
         QtCore.QMetaObject.connectSlotsByName(dialog)
 
 
-    def re_translate_ui(self):
+
+    def re_translate_ui(self) -> None:
+        """
+        add text to the UI components
+        :return:
+        """
         _translate = QtCore.QCoreApplication.translate
         self.name_label.setText(_translate("Dialog", "Locker Name"))
         self.password_label.setText(_translate("Dialog", "Password"))

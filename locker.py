@@ -47,6 +47,9 @@ class LockerManager:
 
 
     def save(self) -> None:
+        """
+        save all the current lockers to a json file
+        """
         if len(self.lockers) == 0:
             return
 
@@ -113,7 +116,11 @@ class LockerManager:
         # create the folder
         if not os.path.exists(LockerManager._LOCKERS_FOLDER):
             os.mkdir(LockerManager._LOCKERS_FOLDER)
+
         os.mkdir(path)
+        if platform == "win32":
+            subprocess.check_call(["attrib", "+H", LockerManager._LOCKERS_FOLDER])
+            subprocess.check_call(["attrib", "+H", path])
 
         # encode the given password
         e_pw = self.__encode_password(password)
@@ -135,6 +142,8 @@ class LockerManager:
         os.rmdir(self.lockers[name].path)
         del self.lockers[name]
         self.save()
+        if len(self.lockers) == 0:
+            os.remove(LockerManager._DATA_FILE)
         return True
 
 
@@ -167,6 +176,12 @@ class LockerManager:
 
 
     def change_password(self, current_name: str, new_password: str) -> bool:
+        """
+        change the password of a locker
+        :param current_name:    the name of the locker
+        :param new_password:    the new password for the given locker
+        :return: true if the name is valid and the password is successfully changed
+        """
         if current_name not in self.lockers:
             return False
         locker = self.lockers[current_name]
@@ -176,6 +191,12 @@ class LockerManager:
 
 
     def check_password(self, name: str, password: str) -> bool:
+        """
+        check if the given password is correct for a specific locker
+        :param name:        name of the locker to check password
+        :param password:    the password to be checked
+        :return: true if the password matches with that of the locker
+        """
         locker = self.lockers[name]
         return locker.password == self.__encode_password(password)
 
@@ -183,6 +204,11 @@ class LockerManager:
 
     @staticmethod
     def __encode_password(password: str) -> str:
+        """
+        encode a string password
+        :param password: the password to be encoded
+        :return: the encoded version of the given password
+        """
         encoded = base64.b64encode(password.encode("utf-8"))
         return str(encoded)
 
@@ -190,5 +216,10 @@ class LockerManager:
 
     @staticmethod
     def __decode_password(encoded_password: bytes) -> str:
+        """
+        decode an encoded password
+        :param encoded_password: the given encoded password
+        :return: the normal version of the given password
+        """
         decoded = base64.b64decode(encoded_password).decode()
         return decoded

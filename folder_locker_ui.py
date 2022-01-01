@@ -41,6 +41,10 @@ class MainWindow(QMainWindow):
 
 
     def __setup_ui(self, window) -> None:
+        """
+        setup the non-dynamic UI components
+        :param window: the main window
+        """
         window.setObjectName("main_window")
         window.setFixedSize(521, 432)
         window.setStyleSheet("background-color: rgb(80, 80, 80); color: rgb(255, 255, 255);")
@@ -104,6 +108,10 @@ class MainWindow(QMainWindow):
 
 
     def __re_translate_ui(self, window) -> None:
+        """
+        add text to the non-dynamic components
+        :param window: the main window
+        """
         _translate = QtCore.QCoreApplication.translate
         window.setWindowTitle(_translate("main_window", "Folder Locker"))
         self.label.setText(_translate("main_window", "Folder Locker"))
@@ -111,16 +119,21 @@ class MainWindow(QMainWindow):
 
 
 
-    def __init_scroll_area(self):
+    def __init_scroll_area(self) -> None:
+        """
+        initialize the scroll area with the lockers
+        """
         names = self._manager.get_lockers_names()
-
         for name in names:
             self.__add_locker_row(name)
 
 
 
-    def __add_locker_row(self, name):
-
+    def __add_locker_row(self, name) -> None:
+        """
+        add a new row/locker to the scroll area
+        :param name: the name of the new locker
+        """
         row = QtWidgets.QFrame(self.scroll_area)
         self._row_map[name] = row
         grid_layout = QtWidgets.QGridLayout(row)
@@ -164,6 +177,9 @@ class MainWindow(QMainWindow):
 
 
     def __on_add_button_clicked(self) -> None:
+        """
+        handle the event when the add button is clicked
+        """
         dialog = PromptDialog(self, "Enter The New Name and Password")
         response = dialog.get_results()
 
@@ -190,10 +206,14 @@ class MainWindow(QMainWindow):
 
 
     def __on_open_button_clicked(self, source) -> None:
+        """
+        handle the event on the open locker button clicked
+        :param source: the source button that was clicked
+        """
         locker_id = self._open_btn_map[source]
         locker_name = self._label_map[locker_id].text()
         pw, _ = QInputDialog.getText(self, "Enter Password",
-                                     f"Please enter the password for locker {locker_name}",
+                                     f"Please enter the password for locker \"{locker_name}\"",
                                      QtWidgets.QLineEdit.Password)
         pw = pw.strip()
         if pw == "":
@@ -210,10 +230,14 @@ class MainWindow(QMainWindow):
 
 
     def __on_edit_button_clicked(self, source) -> None:
+        """
+        handle the event on the edit locker button clicked
+        :param source: the source button that was clicked
+        """
         locker_id = self._edit_btn_map[source]
         locker_name = self._label_map[locker_id].text()
         pw, _ = QInputDialog.getText(self, "Enter Password",
-                                     f"Please enter the password for locker {locker_name}",
+                                     f"Please enter the password for locker \"{locker_name}\"",
                                      QtWidgets.QLineEdit.Password)
         pw = pw.strip()
         if pw == "":
@@ -251,7 +275,29 @@ class MainWindow(QMainWindow):
 
 
     def __on_delete_button_clicked(self, source) -> None:
+        """
+        handle the event when the locker delete button is clicked
+        :param source: the button that was clicked
+        """
         locker_id = self._del_btn_map[source]
+        locker_name = self._label_map[locker_id].text()
+        pw, _ = QInputDialog.getText(self, "Enter Password",
+                                     f"Please enter the password for locker \"{locker_name}\"",
+                                     QtWidgets.QLineEdit.Password)
+        if not self._manager.check_password(locker_name, pw):
+            self.__show_error("Password does not match")
+            return
+
+        msg_box = QMessageBox(self)
+        msg_box.setIcon(QMessageBox.Icon.Question)
+        msg_box.setWindowTitle("Delete Confirm")
+        msg_box.setInformativeText(f"Are you sure you want to delete locker \"{locker_name}\"")
+        msg_box.setStandardButtons(QMessageBox.No | QMessageBox.Yes)
+        response = msg_box.exec_()
+
+        if response == QMessageBox.No:
+            return
+
         if not self._manager.remove_locker(locker_id):
             self.__show_error("An error occurred when deleting the locker!")
             return
@@ -263,6 +309,10 @@ class MainWindow(QMainWindow):
 
     @staticmethod
     def __show_error(message: str) -> None:
+        """
+        show a small popup window to inform the error to the user
+        :param message: the message to be shown
+        """
         err_box = QMessageBox()
         err_box.setIcon(QMessageBox.Critical)
         err_box.setText("Error")
@@ -272,6 +322,10 @@ class MainWindow(QMainWindow):
 
 
     def closeEvent(self, event) -> None:
+        """
+        handle the window close event
+        :param event: the close event
+        """
         reply = QMessageBox.question(self, "Quit Confirm",
                                      "Are you sure you want to quit?",
                                      QMessageBox.Yes | QMessageBox.No, QMessageBox.No)

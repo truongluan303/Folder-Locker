@@ -2,7 +2,7 @@
 *.sh
 *.bat
 *.ps1
-
+*.spec
 build/
 venv/
 __pycache__
